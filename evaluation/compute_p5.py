@@ -35,23 +35,36 @@ def read_csv(path):
 
 
 def check_snapshot():
-    """確認目前的索引和產生判讀表時是同一份，否則結果不可重現。"""
+    """確認目前的索引和產生判讀表時是同一份，否則結果不可重現。回傳 run_info。"""
     if not RUN_INFO_PATH.exists():
         print("警告：找不到 run_info.json，無法確認索引版本。")
-        return
+        return {}
     info = json.loads(RUN_INFO_PATH.read_text(encoding="utf-8"))
     h = hashlib.sha256(Path(config.INDEX_PATH).read_bytes()).hexdigest()
     if h != info.get("index_sha256"):
         print("警告：目前的索引檔和產生 judgments.csv 時不同！")
         print("      判讀結果可能對不上，請確認是否需要重跑 run_evaluation.py。\n")
+    return info
 
 
 def main():
-    check_snapshot()
+    info = check_snapshot()
     queries = read_csv(QUERIES_PATH)
     judgments = read_csv(JUDGMENTS_PATH)
 
     problems = []
+    # 檢查判讀表的列數和當初產生時一致（避免不小心刪掉一列，被當成不相關）
+    for qid, expected in info.get("returned_per_query", {}).items():
+        actual = sum(1 for row in judgments if row["query_id"] == qid)
+        if actual != expected:
+            problems.append(f"{qid}：判讀表有 {actual} 列，但當初產生了 {expected} 列")
+    seen = set()
+    for row in judgments:
+        key = (row["query_id"], row["rank"])
+        if key in seen:
+            problems.append(f"{row['query_id']} 第 {row['rank']} 名：重複出現")
+        seen.add(key)
+
     labels = {}  # (query_id, rank) -> 0/1
     for row in judgments:
         value = (row.get("relevant") or "").strip()

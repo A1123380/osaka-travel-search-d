@@ -97,7 +97,12 @@ def home():
         context["message"] = "查詢中沒有可搜尋的英文單字（本系統只索引英文字母 a–z）。"
         return render_template("search.html", **context)
 
-    results, elapsed_ms = timed_search(query)
+    try:
+        results, elapsed_ms = timed_search(query)
+    except Exception:  # noqa: BLE001  搜尋程式出錯時顯示提示，不讓網頁直接 500
+        app.logger.exception("搜尋時發生錯誤：%r", query)
+        context["message"] = "搜尋時發生錯誤，請換個關鍵字再試一次。"
+        return render_template("search.html", **context)
     context["elapsed_ms"] = elapsed_ms
 
     if not results:
