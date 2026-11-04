@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 產生的索引（內含 A 爬蟲全文，可用 build_temp_index.py 重新產生）
+data/
+
+# 評估的備份檔
+evaluation/*.backup.csv
+
+# 編輯器 / 系統
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

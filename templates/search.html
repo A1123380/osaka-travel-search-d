@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if query %}{{ query }} - {% endif %}Osaka Travel Search</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <header>
+      <h1><a href="{{ url_for('home') }}">Osaka Travel Search</a></h1>
+      <p class="sub">大阪旅遊資訊搜尋引擎 · 已索引 <strong>{{ num_docs }}</strong> 篇網頁</p>
+    </header>
+
+    <form action="{{ url_for('home') }}" method="get" role="search">
+      <input type="text" name="q" value="{{ query }}" maxlength="200"
+             placeholder="例如：osaka castle、takoyaki、kansai airport" autofocus>
+      <button type="submit">搜尋</button>
+    </form>
+
+    {% if message %}
+      <p class="message">{{ message }}</p>
+    {% endif %}
+
+    {% if elapsed_ms is not none %}
+      <p class="meta">
+        {% if results %}找到 {{ results|length }} 筆結果（最多顯示 10 筆）· {% endif %}
+        搜尋耗時 {{ "%.2f"|format(elapsed_ms) }} ms
+        <span class="hint">（僅計算查詢處理與排序，不含頁面渲染）</span>
+      </p>
+    {% endif %}
+
+    {% if results %}
+      <ol class="results">
+        {% for r in results %}
+          <li>
+            <div class="title-row">
+              <span class="rank">{{ r.rank }}</span>
+              {% if r.href %}
+                <a class="title" href="{{ r.href }}" target="_blank" rel="noopener noreferrer">{{ r.title }}</a>
+              {% else %}
+                <span class="title">{{ r.title }}</span>
+              {% endif %}
+            </div>
+            <div class="url">{{ r.url }}</div>
+            <p class="snippet">{% for part, hit in r.snippet %}{% if hit %}<mark>{{ part }}</mark>{% else %}{{ part }}{% endif %}{% endfor %}</p>
+            <div class="score">分數 {{ "%.4f"|format(r.score) }} · 文件編號 {{ r.doc_id }}</div>
+          </li>
+        {% endfor %}
+      </ol>
+    {% endif %}
+  </main>
+</body>
+</html>

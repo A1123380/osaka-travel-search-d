@@ -1,0 +1,11 @@
+query_id,query,information_need,relevance_rule
+Q01,osaka castle history,想了解大阪城的歷史背景,內文有介紹大阪城的歷史（如建城、戰役、重建）才算相關；只在清單或導覽中提到名稱不算
+Q02,takoyaki dotonbori,想找在道頓堀一帶吃章魚燒的資訊,內文介紹章魚燒或道頓堀的美食、店家才算相關；只出現單字未說明不算
+Q03,universal studios japan tickets,想知道日本環球影城的門票與入場資訊,內文有環球影城的門票、價格、購買方式或入場資訊才算相關
+Q04,kaiyukan aquarium,想了解海遊館的展示內容與參觀資訊,內文主要在介紹海遊館（展示、交通、票價、開放時間等）才算相關
+Q05,osaka amazing pass,想知道大阪周遊卡包含什麼、怎麼使用,內文說明周遊卡的價格、可用設施或交通範圍才算相關
+Q06,kansai airport to namba,想知道從關西機場到難波的交通方式,內文說明從關西機場到難波或大阪市區的交通方式（電車、巴士等）才算相關
+Q07,shinsaibashi shopping,想找心齋橋一帶的購物資訊,內文介紹心齋橋的商店街、商場或購物地點才算相關
+Q08,cherry blossom viewing spots,想找大阪的賞櫻景點,內文介紹可以賞櫻的地點或賞櫻季節資訊才算相關
+Q09,sumiyoshi taisha shrine,想了解住吉大社,內文主要在介紹住吉大社（歷史、建築、參拜、交通等）才算相關
+Q10,night view observatory,想找可以看夜景的展望台,內文介紹可以看夜景的展望台或高樓觀景設施才算相關

@@ -1,0 +1,80 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --accent: #0b57d0;
+  --url: #18794e;
+  --border: #d0d7de;
+  --mark: #fff3a3;
+  --msg-bg: #fff8e6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif;
+  line-height: 1.55;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+
+header h1 { margin: 0; font-size: 1.7rem; }
+header h1 a { color: var(--fg); text-decoration: none; }
+.sub { margin: 4px 0 20px; color: var(--muted); }
+
+form { display: flex; gap: 8px; }
+input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+button {
+  padding: 10px 18px;
+  font-size: 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.message {
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  background: var(--msg-bg);
+  border-radius: 8px;
+}
+.meta { margin: 16px 0 0; color: var(--muted); font-size: 0.9rem; }
+.hint { font-size: 0.8rem; }
+
+.results { list-style: none; padding: 0; margin: 16px 0 0; }
+.results li { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.title-row { display: flex; gap: 10px; align-items: baseline; }
+.rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+.title { font-size: 1.1rem; color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+a.title:hover { text-decoration: underline; }
+.url { color: var(--url); font-size: 0.85rem; overflow-wrap: anywhere; }
+.snippet { margin: 6px 0; overflow-wrap: anywhere; }
+mark { background: var(--mark); padding: 0 1px; }
+.score { color: var(--muted); font-size: 0.85rem; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --accent: #6ea8fe;
+    --url: #56d364;
+    --border: #30363d;
+    --mark: #6b5a00;
+    --msg-bg: #2d2400;
+  }
+  input[type="text"] { background: #161b22; color: var(--fg); }
+  button { color: #0d1117; }
+}
