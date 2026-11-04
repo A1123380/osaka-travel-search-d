@@ -1,6 +1,6 @@
 """暫代 C 的搜尋函式（D 測試用）
 
-C（于玲）交出正式的 search.py 後，只要到 config.py 改 import 那一行即可。
+C 交出正式的 search.py 後，只要到 config.py 改 import 那一行即可。
 這裡的約定介面（建議 C 沿用）：
 
     search(query: str, index: dict, top_k: int = 10) -> list[tuple[str, float]]
