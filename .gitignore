@@ -4,8 +4,12 @@ __pycache__/
 .venv/
 venv/
 
-# 產生的索引（內含 A 爬蟲全文，可用 build_temp_index.py 重新產生）
+# 索引（內含 A 爬蟲全文）：暫用索引可重新產生；正式索引由 B 提供
 data/
+c_module/index_osaka.json
+
+# 分給組員的判讀檔（內含 A 爬蟲全文）
+evaluation/judging/
 
 # 評估的備份檔
 evaluation/*.backup.csv

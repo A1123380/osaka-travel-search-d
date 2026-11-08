@@ -95,7 +95,7 @@ def main():
         "index_path": relative_path(config.INDEX_PATH),
         "index_sha256": sha256(config.INDEX_PATH),
         "num_documents": len(index["documents"]),
-        "search_module": config.search.__module__,
+        "search_module": config.SEARCH_SOURCE,
         "queries_sha256": sha256(QUERIES_PATH),
         "cutoff": CUTOFF,
         "returned_per_query": returned,  # 給 compute_p5.py 檢查判讀表有沒有缺列

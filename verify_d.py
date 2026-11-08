@@ -72,7 +72,7 @@ check("索引權重符合「TF=次數/總字數、IDF=log10(N/DF)」", mismatch 
 
 # ---------------------------------------------------------------- 2. 搜尋函式
 section("2. 搜尋函式（C 的輸出，或暫用 search_temp）")
-print(f"      目前使用：{config.search.__module__}.search")
+print(f"      目前使用：{config.SEARCH_SOURCE}")
 
 
 def brute_force(query):
@@ -209,6 +209,6 @@ failed = [r for r in results if not r[1] and r[3] == "失敗"]
 warned = [r for r in results if not r[1] and r[3] != "失敗"]
 print(f"\n共 {len(results)} 項：通過 {len(results) - len(failed) - len(warned)}，"
       f"失敗 {len(failed)}，提醒 {len(warned)}")
-if config.search.__module__ == "search_temp" or "index_temp" in str(config.INDEX_PATH):
+if config.USE_TEMP:
     print("注意：目前仍在使用暫用索引或暫用搜尋，B、C 交件並改 config.py 後請再跑一次。")
 sys.exit(1 if failed else 0)

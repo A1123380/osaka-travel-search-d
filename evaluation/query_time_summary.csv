@@ -1,0 +1,11 @@
+﻿query_id,query,mean_ms,median_ms,max_ms
+Q01,osaka castle history,0.3432,0.2870,0.9772
+Q02,takoyaki dotonbori,0.0439,0.0393,0.1408
+Q03,universal studios japan tickets,0.1587,0.1386,0.5133
+Q04,kaiyukan aquarium,0.0113,0.0111,0.0205
+Q05,osaka amazing pass,0.2962,0.2512,0.6027
+Q06,kansai airport to namba,0.3353,0.3076,0.6468
+Q07,shinsaibashi shopping,0.1624,0.1536,0.2860
+Q08,cherry blossom viewing spots,0.1237,0.1146,0.2603
+Q09,sumiyoshi taisha shrine,0.0335,0.0305,0.0737
+Q10,night view observatory,0.1111,0.0976,0.3697
