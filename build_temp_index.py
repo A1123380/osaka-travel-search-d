@@ -20,7 +20,7 @@ import re
 from pathlib import Path
 
 FOLDER = Path(__file__).resolve().parent
-INPUT_PATH = FOLDER.parent / "1111" / "osaka_pages_cleaned.json"
+INPUT_PATH = FOLDER.parent / "A_爬蟲資料" / "osaka_pages_cleaned.json"
 OUTPUT_PATH = FOLDER / "data" / "index_temp.json"
 
 
