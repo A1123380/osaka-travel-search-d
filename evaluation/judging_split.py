@@ -1,14 +1,14 @@
-"""判讀表分工：拆成每人一份 → 組員填寫 → 合併回 judgments.csv
+"""判讀表：產生附內文的判讀表 → 填寫 → 合併回 judgments.csv
 
-拆分：py evaluation/judging_split.py split
-      產生 evaluation/judging/判讀_A.csv ～ 判讀_D.csv
-      每列附上資訊需求、相關性規則與該篇「內文」（索引當時的內容），組員不必上網查
+產生：py evaluation/judging_split.py split
+      產生 evaluation/judging/判讀_D.csv（10 組查詢共 50 筆，由 D 判讀）
+      每列附上資訊需求、相關性規則與該篇「內文」（索引當時的內容），不必上網查
 
 合併：py evaluation/judging_split.py merge
       讀取 evaluation/judging/判讀_*.csv，把 relevant、reason 填回 judgments.csv
       會檢查文件編號是否對得上，不會用空白蓋掉已經填好的值
 
-組員填寫：只要填 relevant（1 = 相關，0 = 不相關）和 reason（一句理由），其他欄位不要改。
+填寫：只要填 relevant（1 = 相關，0 = 不相關）和 reason（一句理由），其他欄位不要改。
 用 Excel 存檔時請選「CSV UTF-8（逗號分隔）」；存成一般 CSV 也能讀。
 """
 import csv
@@ -24,12 +24,9 @@ JUDGMENTS_PATH = EVAL_DIR / "judgments.csv"
 QUERIES_PATH = EVAL_DIR / "queries.csv"
 OUT_DIR = EVAL_DIR / "judging"
 
-# 分工（可依群組討論調整）
+# 判讀者與負責的查詢（全部由 D 判讀）
 ASSIGN = {
-    "A": ["Q01", "Q02", "Q03"],
-    "B": ["Q04", "Q05", "Q06"],
-    "C": ["Q07", "Q08"],
-    "D": ["Q09", "Q10"],
+    "D": [f"Q{i:02d}" for i in range(1, 11)],
 }
 SPLIT_FIELDS = ["query_id", "query", "rank", "doc_id", "relevant", "reason",
                 "title", "url", "information_need", "relevance_rule", "text"]

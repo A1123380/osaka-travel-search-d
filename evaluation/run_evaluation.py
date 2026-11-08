@@ -1,7 +1,7 @@
 """產生相關性判讀表 judgments.csv
 
 用凍結的索引跑 queries.csv 的 10 組查詢，把每組前 5 筆結果寫進 judgments.csv。
-relevant（1/0）和 reason 兩欄留空，請組員讀完「內文」後填寫。
+relevant（1/0）和 reason 兩欄留空，讀完「內文」後填寫。
 同時把這次使用的索引檔 SHA-256 記錄在 run_info.json，方便日後確認結果可重現。
 
 執行：py evaluation/run_evaluation.py

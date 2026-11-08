@@ -30,8 +30,8 @@ py verify_d.py     # 自我檢查（27 項）
 
 ```bash
 py evaluation/run_evaluation.py           # 1. 產生 judgments.csv
-py evaluation/judging_split.py split      # 2. 拆成每人一份 → evaluation/judging/
-                                          # 3. 組員填 relevant（1/0）和 reason
+py evaluation/judging_split.py split      # 2. 產生附內文的判讀表 → evaluation/judging/判讀_D.csv
+                                          # 3. 填 relevant（1/0）和 reason
 py evaluation/judging_split.py merge      # 4. 合併回 judgments.csv
 py evaluation/compute_p5.py               # 5. 計算 P@5
 py evaluation/benchmark_query_time.py     # 6. 查詢耗時（加分）
