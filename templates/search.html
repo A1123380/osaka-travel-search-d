@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% if query %}{{ query }} - {% endif %}Osaka Travel Search</title>
+  <link rel="icon" href="data:,">  <!-- 不使用網站圖示，避免瀏覽器請求 /favicon.ico 產生 404 紀錄 -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
