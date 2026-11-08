@@ -2,7 +2,7 @@
 
 產生：py evaluation/judging_split.py split
       產生 evaluation/judging/判讀_D.csv（10 組查詢共 50 筆，由 D 判讀）
-      每列附上資訊需求、相關性規則與該篇「內文」（索引當時的內容），不必上網查
+      每列附上相關性規則、該篇開頭（看出主題）與含查詢詞的句子，不必上網查
 
 合併：py evaluation/judging_split.py merge
       讀取 evaluation/judging/判讀_*.csv，把 relevant、reason 填回 judgments.csv
@@ -12,6 +12,7 @@
 用 Excel 存檔時請選「CSV UTF-8（逗號分隔）」；存成一般 CSV 也能讀。
 """
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -28,8 +29,25 @@ OUT_DIR = EVAL_DIR / "judging"
 ASSIGN = {
     "D": [f"Q{i:02d}" for i in range(1, 11)],
 }
-SPLIT_FIELDS = ["query_id", "query", "rank", "doc_id", "relevant", "reason",
-                "title", "url", "information_need", "relevance_rule", "text"]
+SPLIT_FIELDS = ["query_id", "rank", "relevant", "reason", "query", "title",
+                "page_start", "key_sentences", "relevance_rule", "url", "doc_id"]
+LEAD_CHARS = 200      # 開頭摘錄長度
+MAX_SENTENCES = 3     # 含查詢詞的句子最多幾句
+SENTENCE_CHARS = 250  # 每句最長字數
+
+
+def key_sentences(text, query):
+    """挑出含最多查詢詞的句子（依原文順序），讓判讀時不必讀整篇。"""
+    terms = {t for t in config.tokenize(query) if len(t) > 2}
+    sentences = [x.strip() for x in re.split(r"(?<=[.!?])\s+", text) if x.strip()]
+    scored = []
+    for i, sent in enumerate(sentences):
+        hits = terms & set(config.tokenize(sent))
+        if hits:
+            scored.append((len(hits), -i, sent))
+    best = sorted(scored, reverse=True)[:MAX_SENTENCES]
+    best.sort(key=lambda x: -x[1])
+    return " ／ ".join(s[:SENTENCE_CHARS] for _, _, s in best) or "（內文沒有查詢詞）"
 
 
 def read_csv(path):
@@ -66,10 +84,11 @@ def split():
         for row in judgments:
             if row["query_id"] in qids:
                 q = queries[row["query_id"]]
+                text = docs[str(row["doc_id"])]["text"]
                 rows.append({**row,
-                             "information_need": q["information_need"],
                              "relevance_rule": q["relevance_rule"],
-                             "text": docs[str(row["doc_id"])]["text"]})
+                             "page_start": text[:LEAD_CHARS] + ("…" if len(text) > LEAD_CHARS else ""),
+                             "key_sentences": key_sentences(text, row["query"])})
         path = OUT_DIR / f"判讀_{person}.csv"
         write_csv(path, SPLIT_FIELDS, rows)
         print(f"{path.name}：{'、'.join(qids)}，共 {len(rows)} 筆")
