@@ -19,3 +19,6 @@ evaluation/*.backup.csv
 .idea/
 Thumbs.db
 .DS_Store
+
+# 報告產生工具（本機使用）
+report_tools/
