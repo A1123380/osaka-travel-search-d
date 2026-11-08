@@ -22,3 +22,6 @@ Thumbs.db
 
 # 報告產生工具（本機使用）
 report_tools/
+
+# 原始整頁截圖（裁切前）
+screenshots/original/
