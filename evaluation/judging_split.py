@@ -2,7 +2,7 @@
 
 產生：py evaluation/judging_split.py split
       產生 evaluation/judging/判讀_D.csv（10 組查詢共 50 筆，由 D 判讀）
-      每列附上相關性規則、該篇開頭（看出主題）與含查詢詞的句子，不必上網查
+      每列附上相關性規則、該篇開頭（看出主題）與含查詢詞的句子；最後一欄是完整內文，不確定時再看
 
 合併：py evaluation/judging_split.py merge
       讀取 evaluation/judging/判讀_*.csv，把 relevant、reason 填回 judgments.csv
@@ -30,7 +30,7 @@ ASSIGN = {
     "D": [f"Q{i:02d}" for i in range(1, 11)],
 }
 SPLIT_FIELDS = ["query_id", "rank", "relevant", "reason", "query", "title",
-                "page_start", "key_sentences", "relevance_rule", "url", "doc_id"]
+                "page_start", "key_sentences", "relevance_rule", "url", "doc_id", "text"]
 LEAD_CHARS = 200      # 開頭摘錄長度
 MAX_SENTENCES = 3     # 含查詢詞的句子最多幾句
 SENTENCE_CHARS = 250  # 每句最長字數
@@ -88,7 +88,8 @@ def split():
                 rows.append({**row,
                              "relevance_rule": q["relevance_rule"],
                              "page_start": text[:LEAD_CHARS] + ("…" if len(text) > LEAD_CHARS else ""),
-                             "key_sentences": key_sentences(text, row["query"])})
+                             "key_sentences": key_sentences(text, row["query"]),
+                             "text": text})
         path = OUT_DIR / f"判讀_{person}.csv"
         write_csv(path, SPLIT_FIELDS, rows)
         print(f"{path.name}：{'、'.join(qids)}，共 {len(rows)} 筆")
