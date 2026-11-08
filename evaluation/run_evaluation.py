@@ -68,9 +68,11 @@ def main():
     queries = read_queries()
     rows = []
     returned = {}
+    expected_rows = {}
     for q in queries:
         results = config.search(q["query"], index, top_k=CUTOFF)
         returned[q["query_id"]] = len(results)
+        expected_rows[q["query_id"]] = [str(doc_id) for doc_id, _ in results]
         print(f"\n{q['query_id']} {q['query']}（{len(results)} 筆）")
         if len(results) < CUTOFF:
             print(f"  注意：只回傳 {len(results)} 筆，缺少的名次在 P@5 視為不相關")
@@ -98,7 +100,8 @@ def main():
         "search_module": config.SEARCH_SOURCE,
         "queries_sha256": sha256(QUERIES_PATH),
         "cutoff": CUTOFF,
-        "returned_per_query": returned,  # 給 compute_p5.py 檢查判讀表有沒有缺列
+        "returned_per_query": returned,
+        "expected_rows": expected_rows,  # 每組查詢第 1..N 名的文件編號，compute_p5.py 用來檢查判讀表結構
     }
     with RUN_INFO_PATH.open("w", encoding="utf-8") as f:
         json.dump(run_info, f, ensure_ascii=False, indent=2)

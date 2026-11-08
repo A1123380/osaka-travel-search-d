@@ -3,7 +3,12 @@
 讀取填好的 judgments.csv，計算每組查詢的 P@5 與 10 組平均。
 P@5 = 前 5 名中相關的篇數 / 5；回傳不足 5 筆時，缺少的名次視為不相關，分母仍為 5。
 
-執行：py evaluation/compute_p5.py
+計算前會做三道檢查，任何一項不符就停止（避免默默算出錯的結果）：
+  1. 索引快照：目前索引的 SHA-256 必須和 run_info.json 記錄的相同
+  2. 查詢檔：queries.csv 的 SHA-256 必須和 run_info.json 記錄的相同
+  3. 判讀表結構：每組查詢的名次必須剛好是 1..N，且每個名次的文件編號和產生時相同
+
+執行：py evaluation/compute_p5.py（或 python evaluation/compute_p5.py）
 輸出：螢幕表格 + p5_results.csv
 """
 import csv
@@ -30,21 +35,83 @@ def precision_at_k(labels_by_rank, k=CUTOFF):
 
 
 def read_csv(path):
-    with path.open("r", encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f))
+    """先試 UTF-8，失敗再試 cp950（Excel 存成一般 CSV 時的編碼）。"""
+    for enc in ("utf-8-sig", "cp950"):
+        try:
+            with path.open("r", encoding=enc, newline="") as f:
+                return list(csv.DictReader(f))
+        except UnicodeDecodeError:
+            continue
+    raise ValueError(f"無法讀取 {path}，請用「CSV UTF-8」格式存檔")
+
+
+def sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def stop(title, problems):
+    print(f"{title}，共 {len(problems)} 個問題（列出前 10 個）：")
+    for p in problems[:10]:
+        print("  -", p)
+    sys.exit(1)
 
 
 def check_snapshot():
-    """確認目前的索引和產生判讀表時是同一份，否則結果不可重現。回傳 run_info。"""
+    """檢查 1、2：索引與查詢檔必須和產生判讀表時相同。回傳 run_info。"""
     if not RUN_INFO_PATH.exists():
-        print("警告：找不到 run_info.json，無法確認索引版本。")
-        return {}
+        stop("找不到 run_info.json", ["請先執行 run_evaluation.py 產生判讀表"])
     info = json.loads(RUN_INFO_PATH.read_text(encoding="utf-8"))
-    h = hashlib.sha256(Path(config.INDEX_PATH).read_bytes()).hexdigest()
-    if h != info.get("index_sha256"):
-        print("警告：目前的索引檔和產生 judgments.csv 時不同！")
-        print("      判讀結果可能對不上，請確認是否需要重跑 run_evaluation.py。\n")
+    problems = []
+    if sha256(config.INDEX_PATH) != info.get("index_sha256"):
+        problems.append("目前的索引檔和產生 judgments.csv 時不同")
+    if sha256(QUERIES_PATH) != info.get("queries_sha256"):
+        problems.append("queries.csv 在產生 judgments.csv 之後被修改過")
+    if "expected_rows" not in info:
+        problems.append("run_info.json 是舊版格式，缺少 expected_rows")
+    if problems:
+        problems.append("判讀結果和目前的索引／查詢對不上，請重新執行 run_evaluation.py 並重新判讀")
+        stop("評估快照不一致，無法計算", problems)
     return info
+
+
+def check_structure(queries, judgments, expected_rows):
+    """檢查 3：每組查詢的 (名次, 文件編號) 必須和產生時完全相同。"""
+    problems = []
+    qids = {q["query_id"] for q in queries}
+    for row in judgments:
+        if row.get("query_id") not in qids:
+            problems.append(f"出現不在 queries.csv 的查詢編號「{row.get('query_id')}」")
+
+    for qid in sorted(qids):
+        expected = [str(d) for d in expected_rows.get(qid, [])]
+        actual = {}
+        for row in judgments:
+            if row.get("query_id") != qid:
+                continue
+            rank_text = str(row.get("rank", "")).strip()
+            if not rank_text.isdigit():
+                problems.append(f"{qid}：名次「{rank_text}」不是正整數")
+                continue
+            rank = int(rank_text)
+            if rank in actual:
+                problems.append(f"{qid} 第 {rank} 名：重複出現")
+            actual[rank] = str(row.get("doc_id", "")).strip()
+
+        expected_ranks = set(range(1, len(expected) + 1))
+        if set(actual) != expected_ranks:
+            missing = sorted(expected_ranks - set(actual))
+            extra = sorted(set(actual) - expected_ranks)
+            detail = []
+            if missing:
+                detail.append(f"缺少第 {missing} 名")
+            if extra:
+                detail.append(f"多出第 {extra} 名")
+            problems.append(f"{qid}：名次應為 1–{len(expected)}，" + "、".join(detail))
+        for rank, doc_id in actual.items():
+            if 1 <= rank <= len(expected) and doc_id != expected[rank - 1]:
+                problems.append(f"{qid} 第 {rank} 名：文件編號應為 {expected[rank - 1]}，"
+                                f"判讀表是 {doc_id}")
+    return problems
 
 
 def main():
@@ -52,35 +119,22 @@ def main():
     queries = read_csv(QUERIES_PATH)
     judgments = read_csv(JUDGMENTS_PATH)
 
-    problems = []
-    # 檢查判讀表的列數和當初產生時一致（避免不小心刪掉一列，被當成不相關）
-    for qid, expected in info.get("returned_per_query", {}).items():
-        actual = sum(1 for row in judgments if row["query_id"] == qid)
-        if actual != expected:
-            problems.append(f"{qid}：判讀表有 {actual} 列，但當初產生了 {expected} 列")
-    seen = set()
-    for row in judgments:
-        key = (row["query_id"], row["rank"])
-        if key in seen:
-            problems.append(f"{row['query_id']} 第 {row['rank']} 名：重複出現")
-        seen.add(key)
+    problems = check_structure(queries, judgments, info["expected_rows"])
+    if problems:
+        stop("judgments.csv 的結構和產生時不符（名次或文件編號被改動）", problems)
 
-    labels = {}  # (query_id, rank) -> 0/1
+    labels, unfilled = {}, []
     for row in judgments:
         value = (row.get("relevant") or "").strip()
         where = f"{row['query_id']} 第 {row['rank']} 名"
         if value not in ("0", "1"):
-            problems.append(f"{where}：relevant 必須是 1 或 0（目前是「{value}」）")
+            unfilled.append(f"{where}：relevant 必須是 1 或 0（目前是「{value}」）")
             continue
         if not (row.get("reason") or "").strip():
-            problems.append(f"{where}：缺少判斷理由 reason")
+            unfilled.append(f"{where}：缺少判斷理由 reason")
         labels[(row["query_id"], int(row["rank"]))] = int(value)
-
-    if problems:
-        print(f"judgments.csv 還沒填完整，共 {len(problems)} 個問題（列出前 10 個）：")
-        for p in problems[:10]:
-            print("  -", p)
-        sys.exit(1)
+    if unfilled:
+        stop("judgments.csv 還沒填完整", unfilled)
 
     out = []
     for q in queries:

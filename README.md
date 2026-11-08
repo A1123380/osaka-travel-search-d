@@ -5,7 +5,9 @@
 
 ## 執行
 
-需要 Python 3.10、Flask 3.1.3。
+需要 Python 3.10、Flask 3.1.3。以下指令用 `py`；如果電腦上的 `py` 不能用（例如 conda 環境），全部改成 `python` 即可，例如 `python app.py`。
+
+`c_module/index_osaka.json`（B 的正式索引）不在 git 中，執行前要先放進 `c_module/`。
 
 ```bash
 py -m pip install -r requirements.txt
